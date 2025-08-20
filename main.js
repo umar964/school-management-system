@@ -10,10 +10,12 @@ app.use(bodyParser.json());
 app.use(bodyParser.urlencoded({ extended: true }));
 
 const db = mySql.createConnection({
-    host:"localhost",
-    user:'root',
-    password: process.env.password,
-    database: 'schoolDB'  
+    host:process.env.DB_HOST,
+    user:process.env.DB_USER,
+    password: process.env.DB_PASSWORD,
+    database: process.env.DB_NAME,
+    port: process.env.DB_PORT || 3306 
+    
 });
 
 db.connect(err=>{
@@ -34,7 +36,10 @@ app.post('/addSchools',(req,res)=>{
     }
     const query = 'INSERT INTO schools (name,address,latitude,longitude) VALUES (?,?,?,?)';
     db.query(query,[name,address,latitude,longitude],(err,result)=>{
-        if(err) return res.status(500).json({error: err.message});
+        if(err) {
+            console.error('Error inserting school:', err);
+            return res.status(500).json({error: err.message})
+        };
         res.status(201).json({message: 'School added successfully', id: result.insertId});
     });
 });
@@ -77,7 +82,7 @@ app.get('/', (req, res) => {
 
 
 
-app.listen(process.env.PORT,()=>{
-    console.log(`Server is running on port ${process.env.PORT}`);
+app.listen(process.env.BACKEND_PORT,()=>{
+    console.log(`Server is running on port ${process.env.BACKEND_PORT}`);
 });
 
